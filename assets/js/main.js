@@ -18,56 +18,70 @@ window.addEventListener("click", function (e) {
 //? Handle Validate Form
 
 function Validator(form) {
-  const formElement = $(form);
-  const $$form = formElement.querySelector.bind(formElement);
+  const formElement = $("#form-1");
+  const FORM = formElement.querySelector.bind(formElement);
   const inputList = formElement.querySelectorAll("input");
+  const submitBtn = FORM(".form-submit");
 
-  //? Handle disabled submit
-
-  setInterval(function () {
-    checkSubmit();
-  }, 0);
-  let isValid = true;
-
-  function checkSubmit() {
-    var passValue = $$form("#password").value.trim();
-    var confirmPassValue = $$form("#password_confirm").value.trim();
-
-    inputList.forEach(function (input) {
-      if (
-        input.value === "" ||
-        getParent(input).classList.contains("invalid") ||
-        passValue !== confirmPassValue
-      ) {
-        isValid = false;
-        submitBtn.setAttribute("disabled", "true");
-        submitBtn.classList.remove("isActive");
-      } else isValid = true;
-    });
-    if (isValid === true) {
-      submitBtn.removeAttribute("disabled");
-      submitBtn.classList.add("isActive");
-    }
-  }
-
+  //? Check input onchage
   inputList.forEach(function (inputElement) {
-    inputElement.onblur = function () {
-      checkBlur(inputElement);
-    };
-    inputElement.onfocus = function () {
-      checkFocus(inputElement);
+    inputElement.oninput = function () {
+      const confirmPass = FORM("#password_confirm");
+      const confirmPassValue = confirmPass.value.trim();
+      const passValue = FORM("#password").value.trim();
+
+      if (passValue !== confirmPassValue) {
+        errorMessage(
+          confirmPass,
+          "The password and confirm password don't match"
+        );
+      } else {
+        getParent(confirmPass).classList.remove("invalid");
+        getParent(confirmPass, ".form-message").innerHTML = "";
+      }
+
+      if (checkInputChange(inputElement) !== false) {
+        getParent(inputElement).classList.remove("invalid");
+        getParent(inputElement, ".form-message").innerHTML = "";
+      }
+
+      //? Handle disabled submit
+      let isValid;
+      +(function checkSubmit() {
+        if (passValue !== confirmPassValue) {
+          isValid = false;
+        } else isValid = true;
+
+        inputList.forEach(function (input) {
+          if (
+            input.value === "" ||
+            getParent(input).classList.contains("invalid")
+          )
+            isValid = false;
+        });
+
+        if (isValid === false) {
+          submitBtn.setAttribute("disabled", "true");
+          submitBtn.classList.remove("isActive");
+        } else {
+          submitBtn.removeAttribute("disabled");
+          submitBtn.classList.add("isActive");
+        }
+      })();
     };
   });
 
-  const submitBtn = $$form(".form-submit");
   submitBtn.onclick = function (e) {
     e.preventDefault();
     modal.classList.add("show");
   };
 
-  //? Handle Blur
+  function getValueById(inputElement) {
+    return FORM(inputElement).value.trim();
+  }
 
-  function checkBlur(inputElement) {
+  //? Handle Input Changes
+  function checkInputChange(inputElement) {
     const nameValue = getValueById("#fullname");
     const emailValue = getValueById("#email");
     const passValue = getValueById("#password");
@@ -79,51 +93,37 @@ function Validator(form) {
       return false;
     }
     const formatName = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    if (inputElement.name === "fullname") {
-      if (formatName.test(nameValue)) {
-        message = "Special characters are not allowed";
-        errorMessage(inputElement, message);
-        return false;
-      }
+    if (inputElement.name === "fullname" && formatName.test(nameValue)) {
+      message = "Special characters are not allowed";
+      errorMessage(inputElement, message);
+      return false;
     }
 
     const formatEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (inputElement.name === "email") {
-      if (!formatEmail.test(emailValue)) {
-        message = "Please enter a valid email address";
-        errorMessage(inputElement, message);
-        return false;
-      }
+    if (inputElement.name === "email" && !formatEmail.test(emailValue)) {
+      message = "Please enter a valid email address";
+      errorMessage(inputElement, message);
+      return false;
     }
 
     const formatPass = /^(?=.*[a-z])(?=.*[A-Z]).{8,32}$/;
-    if (inputElement.name === "password") {
-      if (!formatPass.test(passValue)) {
-        message =
-          "8-32 characters, 1 uppercase, 1 lowercase";
-        errorMessage(inputElement, message);
-        return false;
-      }
+    if (inputElement.name === "password" && !formatPass.test(passValue)) {
+      message = "8-32 characters, 1 uppercase, 1 lowercase";
+      errorMessage(inputElement, message);
+      return false;
     }
-    if (inputElement.name === "password_confirm") {
-      if (confirmPassValue !== passValue) {
-        message = "The password and confirm password don't match";
-        errorMessage(inputElement, message);
-        return false;
-      }
-    }
-
-    function getValueById(inputElement) {
-      return $$form(inputElement).value.trim();
+    if (
+      inputElement.name === "password_confirm" &&
+      confirmPassValue !== passValue
+    ) {
+      message = "The password and confirm password don't match";
+      errorMessage(inputElement, message);
+      return false;
     }
   }
 }
 
-//? Handle Focus
-function checkFocus(inputElement) {
-  getParent(inputElement).classList.remove("invalid");
-  getParent(inputElement, ".form-message").innerHTML = "";
-}
+//? Handle Error Messages
 
 function errorMessage(inputElement, message) {
   getParent(inputElement).classList.add("invalid");

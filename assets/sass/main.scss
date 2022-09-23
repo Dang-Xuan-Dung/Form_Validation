@@ -1,29 +1,43 @@
 @import "reset";
 .main {
   font-family: "Roboto", sans-serif;
-  padding-top: 100px;
   height: 100vh;
-
+  position: relative;
   background-color: #d8dede;
   background-image: linear-gradient(315deg, #d8dede 0%, #e5bdf6 74%);
 }
 
 .form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 500px;
+
   padding: 50px 0;
   border-radius: 8px;
 
   background-color: white;
   box-shadow: 0px 0px 30px -9px gray;
+  transition: all 0.2s linear;
 
   @media (max-width: 600px) {
     max-width: 350px;
+    padding: 20px 0;
+
+    &-heading {
+      font-size: 1.7em;
+    }
+  }
+  @media (max-width: 375px) {
+    max-width: 350px;
+    padding: 5px 0;
   }
 
   &-heading {
     padding-bottom: 10px;
+    margin: 0;
   }
   &-img {
     width: 100px;
@@ -40,30 +54,9 @@
   }
 }
 
-.form-submit {
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 700;
-
-    height: 50px;
-    width: 150px;
-
-    border: none;
-    border-radius: 5px;
-    transition: all 0.2s linear;
-    color: white;
-    background-color: #b9bec0;
-    &.isActive{
-      background-image: linear-gradient(315deg, #08e1ae 0%, #98de5b 74%);
-      &:hover {
-      opacity: 0.8;
-    }
-    }
-  }
-
 .form-group {
   position: relative;
-  padding: 20px;
+  padding: 20px 20px 30px 20px;
 
   &.invalid .form-control {
     border-color: #f33a58;
@@ -90,13 +83,37 @@
 
 .form-message {
   text-align: start;
-  font-size: 15px;
+  font-size: 14px;
   display: block;
   width: 70%;
-  margin: auto;
+  margin: 0 auto;
   position: absolute;
-  left: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  // left: 0px;
   color: #f33a58;
+}
+
+.form-submit {
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 5px;
+
+  height: 50px;
+  width: 150px;
+
+  border: none;
+  border-radius: 5px;
+  transition: all 0.2s linear;
+  color: white;
+  background-color: #b9bec0;
+  &.isActive {
+    background-image: linear-gradient(315deg, #08e1ae 0%, #98de5b 74%);
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }
 
 .modal {
@@ -113,14 +130,16 @@
   box-shadow: rgb(177, 168, 168) 0px 18px 34px -1px;
   transition: all 0.3s ease-in-out;
 
-  @media (max-width : 815px) {
+  @media (max-width: 815px) {
     width: 600px;
   }
 
-  @media (max-width : 600px) {
+  @media (max-width: 600px) {
+    width: 450px;
+  }
+  @media (max-width: 470px) {
     width: 300px;
   }
-  
 
   &.show {
     transform: translate(-50%, -50%);
@@ -156,10 +175,10 @@
   padding: 30px 0;
   border-radius: 0 0 10px 10px;
   background-color: rgb(105, 147, 179);
-  color: white;  
+  color: white;
 }
 
-.login{
+.login {
   text-decoration: none;
   padding: 5px 10px;
   color: white;
@@ -168,8 +187,7 @@
   background-color: #087ab0;
   box-shadow: rgb(177, 168, 168) 0px 18px 34px -1px;
 
-  &:hover{
+  &:hover {
     opacity: 0.8;
   }
- 
 }
