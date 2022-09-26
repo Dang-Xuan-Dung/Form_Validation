@@ -417,12 +417,14 @@ template {
   -webkit-transition: all 0.2s linear;
   transition: all 0.2s linear;
   color: white;
+}
+.form-submit:disabled {
   background-color: #b9bec0;
 }
-.form-submit.isActive {
+.form-submit:enabled {
   background-image: linear-gradient(315deg, #08e1ae 0%, #98de5b 74%);
 }
-.form-submit.isActive:hover {
+.form-submit:enabled:hover {
   opacity: 0.8;
 }
 

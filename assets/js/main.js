@@ -1,10 +1,22 @@
 const $ = document.querySelector.bind(document);
-
-Validator("#form-1");
-
-//? Handle Modal
 const modal = $(".modal");
 const modalClose = $(".modal-close");
+
+const FORMAT = {
+  NAME: /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/,
+  EMAIL: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z]).{8,32}$/,
+};
+const MESSAGE = {
+  FULLNAME: "Special characters are not allowed",
+  EMAIL: "Please enter a valid email address",
+  PASSWORD: "8-32 characters, 1 uppercase, 1 lowercase",
+  PASSWORD_CONFIRM: "The password and confirm password don't match",
+};
+
+validateForm("#form-1");
+
+//? Handle Modal
 modalClose.onclick = function () {
   modal.classList.remove("show");
 };
@@ -17,109 +29,94 @@ window.addEventListener("click", function (e) {
 
 //? Handle Validate Form
 
-function Validator(form) {
-  const formElement = $("#form-1");
+function validateForm(form) {
+  const formElement = $(form);
   const FORM = formElement.querySelector.bind(formElement);
   const inputList = formElement.querySelectorAll("input");
   const submitBtn = FORM(".form-submit");
+  const confirmPass = FORM("#password_confirm");
 
-  //? Check input onchage
+  //? Handle input changes
   inputList.forEach(function (inputElement) {
-    inputElement.oninput = function () {
-      const confirmPass = FORM("#password_confirm");
-      const confirmPassValue = confirmPass.value.trim();
-      const passValue = FORM("#password").value.trim();
+    inputElement.addEventListener("input", function(){
 
-      if (passValue !== confirmPassValue) {
-        errorMessage(
-          confirmPass,
-          "The password and confirm password don't match"
-        );
-      } else {
-        getParent(confirmPass).classList.remove("invalid");
-        getParent(confirmPass, ".form-message").innerHTML = "";
-      }
+        if (checkInputChange(inputElement) === true) {
+          getParent(inputElement).classList.remove("invalid");
+          getParent(inputElement, ".form-message").innerHTML = "";
+        } 
 
-      if (checkInputChange(inputElement) !== false) {
-        getParent(inputElement).classList.remove("invalid");
-        getParent(inputElement, ".form-message").innerHTML = "";
-      }
-
-      //? Handle disabled submit
-      let isValid;
-      +(function checkSubmit() {
-        if (passValue !== confirmPassValue) {
-          isValid = false;
-        } else isValid = true;
-
-        inputList.forEach(function (input) {
-          if (
-            input.value === "" ||
-            getParent(input).classList.contains("invalid")
-          )
-            isValid = false;
-        });
-
-        if (isValid === false) {
-          submitBtn.setAttribute("disabled", "true");
-          submitBtn.classList.remove("isActive");
-        } else {
-          submitBtn.removeAttribute("disabled");
-          submitBtn.classList.add("isActive");
+        else {
+          if (inputElement.value === "") {
+            errorMessage(inputElement);
+          } else
+            errorMessage(inputElement, MESSAGE[inputElement.name.toUpperCase()]);
         }
-      })();
-    };
+    
+        //? Handle disabled submit
+        let isValid = true;
+        +(function checkSubmit() {
+          isValid = Array.from(inputList).every(function (input) {
+            return (
+              input.value !== "" &&
+              !getParent(input).classList.contains("invalid")
+            );
+          });
+          if (isValid) {
+            submitBtn.removeAttribute("disabled");
+          } else {
+            submitBtn.setAttribute("disabled", "true");
+          }
+        })();
+    })
   });
 
-  submitBtn.onclick = function (e) {
+
+ 
+
+  submitBtn.addEventListener("click", (e)=> {
     e.preventDefault();
     modal.classList.add("show");
-  };
+  })
 
   function getValueById(inputElement) {
-    return FORM(inputElement).value.trim();
+    return FORM(inputElement).value;
   }
 
-  //? Handle Input Changes
+  //? Check Input Changes
   function checkInputChange(inputElement) {
-    const nameValue = getValueById("#fullname");
-    const emailValue = getValueById("#email");
+    const nameValue = getValueById("#fullname").trim();
+    const emailValue = getValueById("#email").trim();
     const passValue = getValueById("#password");
-    const confirmPassValue = getValueById("#password_confirm");
-    let message = "";
+    const confirmPassValue = getValueById("#password_confirm"); 
 
-    if (inputElement.value.trim() === "") {
-      errorMessage(inputElement);
-      return false;
-    }
-    const formatName = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    if (inputElement.name === "fullname" && formatName.test(nameValue)) {
-      message = "Special characters are not allowed";
-      errorMessage(inputElement, message);
+    if (inputElement.value.trim() === "") { 
       return false;
     }
 
-    const formatEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (inputElement.name === "email" && !formatEmail.test(emailValue)) {
-      message = "Please enter a valid email address";
-      errorMessage(inputElement, message);
+    if (inputElement.name === "fullname" && FORMAT.NAME.test(nameValue)) {
       return false;
     }
 
-    const formatPass = /^(?=.*[a-z])(?=.*[A-Z]).{8,32}$/;
-    if (inputElement.name === "password" && !formatPass.test(passValue)) {
-      message = "8-32 characters, 1 uppercase, 1 lowercase";
-      errorMessage(inputElement, message);
+    if (inputElement.name === "email" && !FORMAT.EMAIL.test(emailValue)) {
       return false;
     }
-    if (
-      inputElement.name === "password_confirm" &&
-      confirmPassValue !== passValue
-    ) {
-      message = "The password and confirm password don't match";
-      errorMessage(inputElement, message);
+
+    if (inputElement.name === "password" && passValue !== confirmPassValue) {
+      errorMessage(confirmPass, MESSAGE.PASSWORD_CONFIRM);
+      if (FORMAT.PASSWORD.test(passValue)) {
+        return true;
+      }
+      return false;
+    } 
+    else {
+      getParent(confirmPass).classList.remove("invalid");
+      getParent(confirmPass, ".form-message").innerHTML = "";
+    }
+
+    if (inputElement.name === "password_confirm" && confirmPassValue !== passValue){
       return false;
     }
+    return true;
   }
 }
 
