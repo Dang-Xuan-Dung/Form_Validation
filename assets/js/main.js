@@ -2,17 +2,28 @@ const $ = document.querySelector.bind(document);
 const modal = $(".modal");
 const modalClose = $(".modal-close");
 
-const FORMAT = {
-  NAME: /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/,
-  EMAIL: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z]).{8,32}$/,
+
+const INPUT_VALIDATION = {
+  FULLNAME: {
+    FORMAT : /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/,
+    MESSAGE :"Special characters are not allowed"
+  },
+  EMAIL: {
+    FORMAT : /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+    MESSAGE : "Please enter a valid email address"
+  },
+  PASSWORD: {
+    FORMAT :  /^(?=.*[a-z])(?=.*[A-Z]).{8,32}$/,
+    MESSAGE : "8-32 characters, 1 uppercase, 1 lowercase"
+  },
+
+  PASSWORD_CONFIRM : {
+    MESSAGE : "The password and confirm password don't match"
+  }
+
 };
-const MESSAGE = {
-  FULLNAME: "Special characters are not allowed",
-  EMAIL: "Please enter a valid email address",
-  PASSWORD: "8-32 characters, 1 uppercase, 1 lowercase",
-  PASSWORD_CONFIRM: "The password and confirm password don't match",
-};
+
+
 
 validateForm("#form-1");
 
@@ -29,12 +40,12 @@ window.addEventListener("click", function (e) {
 
 //? Handle Validate Form
 
-function validateForm(form) {
-  const formElement = $(form);
-  const FORM = formElement.querySelector.bind(formElement);
+function validateForm(formName) {
+  const formElement = $(formName);
+  const form = formElement.querySelector.bind(formElement);
   const inputList = formElement.querySelectorAll("input");
-  const submitBtn = FORM(".form-submit");
-  const confirmPass = FORM("#password_confirm");
+  const submitBtn = form(".form-submit");
+  const confirmPass = form("#password_confirm");
 
   //? Handle input changes
   inputList.forEach(function (inputElement) {
@@ -46,10 +57,11 @@ function validateForm(form) {
         } 
 
         else {
+
           if (inputElement.value === "") {
             errorMessage(inputElement);
           } else
-            errorMessage(inputElement, MESSAGE[inputElement.name.toUpperCase()]);
+            errorMessage(inputElement, INPUT_VALIDATION[inputElement.name.toUpperCase()].MESSAGE);
         }
     
         //? Handle disabled submit
@@ -71,7 +83,6 @@ function validateForm(form) {
   });
 
 
- 
 
   submitBtn.addEventListener("click", (e)=> {
     e.preventDefault();
@@ -79,7 +90,7 @@ function validateForm(form) {
   })
 
   function getValueById(inputElement) {
-    return FORM(inputElement).value;
+    return form(inputElement).value;  
   }
 
   //? Check Input Changes
@@ -93,20 +104,18 @@ function validateForm(form) {
       return false;
     }
 
-    if (inputElement.name === "fullname" && FORMAT.NAME.test(nameValue)) {
-      return false;
+    if (inputElement.name === "fullname") {
+      return !INPUT_VALIDATION.FULLNAME.FORMAT.test(nameValue);
     }
 
-    if (inputElement.name === "email" && !FORMAT.EMAIL.test(emailValue)) {
-      return false;
+    if (inputElement.name === "email") {
+      return INPUT_VALIDATION.EMAIL.FORMAT.test(emailValue);
     }
 
     if (inputElement.name === "password" && passValue !== confirmPassValue) {
-      errorMessage(confirmPass, MESSAGE.PASSWORD_CONFIRM);
-      if (FORMAT.PASSWORD.test(passValue)) {
-        return true;
-      }
-      return false;
+      errorMessage(confirmPass, INPUT_VALIDATION.PASSWORD_CONFIRM.MESSAGE);  
+      return (INPUT_VALIDATION.PASSWORD.FORMAT.test(passValue))
+
     } 
     else {
       getParent(confirmPass).classList.remove("invalid");
